@@ -8,5 +8,5 @@ import controllers
 app.register_blueprint(controllers.example)
 
 # Starting the app
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(port = 3000, debug = True)
