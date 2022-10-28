@@ -6,6 +6,7 @@ import controllers
 
 # Register controllers
 app.register_blueprint(controllers.example)
+app.register_blueprint(controllers.tasks)
 
 # Starting the app
 if __name__ == '__main__':
