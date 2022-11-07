@@ -18,5 +18,7 @@ app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD') or None
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB') or None
 app.config['MYSQL_CHARSET'] = os.getenv('MYSQL_CHARSET') or 'utf-8'
 
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
 # MySQL - Connection
 mysql = MySQL(app)
