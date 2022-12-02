@@ -10,21 +10,10 @@ from utils import encryptation
 def create_user(username, password, first_name, last_name): # Number
     password_hash = encryptation.create_password_hash(password)
 
-    query = 'INSERT INTO tblUsers(Username, Password, FirstName, LastName) VALUES(%s, %s, %s, %s)'
+    query = 'INSERT INTO tblUsers(Username, Password, FirstName, LastName, UserType, UserStatus) VALUES(%s, %s, %s, %s, 1, 1)'
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (username, password_hash, first_name, last_name,))
-    mysql.connection.commit()
-    cursor.close()
-
-    return cursor.lastrowid
-
-
-def create_user_profile(user_id, first_name, last_name): # Number
-    query = 'INSERT INTO tblUsersProfiles(UserId, FirstName, LastName) VALUES(%s, %s, %s)'
-
-    cursor = mysql.connection.cursor()
-    cursor.execute(query, (user_id, first_name, last_name,))
     mysql.connection.commit()
     cursor.close()
 
@@ -48,12 +37,29 @@ def validate_credentials(username, password): # Number
     return row['UserId']
 
 
-def get_user_profiles(user_id): # Object[]
-    query = 'SELECT UserProfileId, FirstName, LastName FROM tblUsersProfiles Where UserId = %s'
+def validate_existing_user_id(user_id): # Boolean
+    query = 'SELECT COUNT(UserId) AS Count FROM tblUsers WHERE UserId = %s';    
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (user_id,))
-    rows = cursor.fetchall()
+    count = cursor.fetchone()['Count']
+    cursor.close()
+    print(count)
+    if count == 0:
+        return False
+
+    return True
+
+
+def validate_existing_username(username): # Boolean
+    query = 'SELECT COUNT(UserId) AS Count FROM tblUsers WHERE Username = %s';    
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (username,))
+    count = cursor.fetchone()['Count']
     cursor.close()
 
-    return rows
+    if count == 0:
+        return False
+
+    return True
