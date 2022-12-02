@@ -38,28 +38,28 @@ def validate_credentials(username, password): # Number
 
 
 def validate_existing_user_id(user_id): # Boolean
-    query = 'SELECT COUNT(UserId) AS Count FROM tblUsers WHERE UserId = %s';    
+    query = 'SELECT UserId FROM tblUsers WHERE UserId = %s LIMIT 1';    
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (user_id,))
-    count = cursor.fetchone()['Count']
+    row = cursor.fetchone()
     cursor.close()
-    print(count)
-    if count == 0:
+
+    if row == None:
         return False
 
     return True
 
 
 def validate_existing_username(username): # Boolean
-    query = 'SELECT COUNT(UserId) AS Count FROM tblUsers WHERE Username = %s';    
+    query = 'SELECT UserId FROM tblUsers WHERE Username = %s LIMIT 1';    
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (username,))
-    count = cursor.fetchone()['Count']
+    row = cursor.fetchone()
     cursor.close()
 
-    if count == 0:
+    if row == None:
         return False
 
     return True

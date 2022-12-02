@@ -15,8 +15,8 @@ def create_user_profile(user_id, first_name, last_name): # Number
     return cursor.lastrowid
 
 
-def get_user_profiles(user_id): # Object[]
-    query = 'SELECT UserProfileId, FirstName, LastName FROM tblUsersProfiles Where UserId = %s'
+def get_all_by_user_id(user_id): # Object[]
+    query = 'SELECT UserProfileId, FirstName, LastName FROM tblUsersProfiles Where UserId = %s ORDER BY FirstName ASC'
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (user_id,))
