@@ -1,83 +1,108 @@
 # Dependecies import
-from flask import Blueprint, request, jsonify, json
+from flask import Blueprint, request
+
+# Models import
+from models import activity
+from models import task_node
+from models import task
+from models import user_profile
+
+# Utils import
+from utils import helpers
+
+# Modules import
+import os
 
 # Controller initialization
 tasks = Blueprint('tasks', __name__)
-
-
-class task:
-    def __init__(self, id, name, img_url):
-        self.id = id
-        self.name = name 
-        self.img_url = img_url
-
-class task_option:
-    def __init__(self, id, img_url):
-        self.id = id
-        self.img_url = img_url
 
 
 # Endpoints
 
 @tasks.route('/tasks', methods=['GET'])
 def get_tasks():
+    task_list = task.get_all()
 
-    # TODO Obtener la lista de tareas/actividades de la BD a desplegar en la app.
-
-    task_list = []
-
-    task_list.append((task(1, 'Tender la cama', 'https://i.pinimg.com/originals/35/85/2a/35852ae56097fda9bc4517590a912530.jpg').__dict__))
-    task_list.append((task(2, 'Lavarse los dientes', 'http://www.hospitaldefuenlabrada.org/TEA/img/pictos/cepillar-dientes.jpg').__dict__))
-    task_list.append((task(3, 'Hacer la mesa', 'https://educasaac.educa.madrid.org/uploads/image.php?file=201702091514452.png&name=poner-la-mesa_picto_color&folder=images').__dict__))
-
-    return send_json_response(task_list)
-
-@tasks.route('/tasks/<string:task_id>/start', methods=['POST'])
-def start_task(task_id):
-
-    json = get_request_json(request)
-
-    user_id = json['userId']
-
-    # TODO Inicializar una sesión para la actividad y guardar el registro de elecciones en BD.
-    # Si el usuario tiene una actividad sin completar (por si abandona la app), marcar como completadas la(s) tarea(s) incompletas.
-
-    session_id = 33;
-
-    return send_json_response(session_id)
+    # Response
+    return helpers.send_json_response({ 'Tasks': task_list })
 
 
-@tasks.route('/tasks/<string:session_id>', methods=['GET'])
-def get_task_options(session_id):
+@tasks.route('/tasks/start', methods=['POST'])
+def start_task():
+    # Body
+    body = helpers.get_request_json(request)
 
-    # TODO Obtener la lista de tareas/actividades de la BD a desplegar en la app.
+    # Task Validation
 
-    task_list = []
+    task_id = helpers.get_number_or_default_param(body, 'taskId')
 
-    task_list.append((task_option(1, 'https://i.pinimg.com/originals/35/85/2a/35852ae56097fda9bc4517590a912530.jpg').__dict__))
-    task_list.append((task_option(2, 'http://www.hospitaldefuenlabrada.org/TEA/img/pictos/cepillar-dientes.jpg').__dict__))
-    task_list.append((task_option(3, 'https://educasaac.educa.madrid.org/uploads/image.php?file=201702091514452.png&name=poner-la-mesa_picto_color&folder=images').__dict__))
+    task_selected = task.get_single_by_task_id(task_id)
 
-    return send_json_response(task_list)
+    if task_selected == None:
+        return helpers.send_json_response(None, 'Tarea no encontrada.', 'bad_request', False)
+
+    # User Profile Validation
+
+    user_profile_id = helpers.get_number_or_default_param(body, 'userProfileId')
+
+    user_profile_id_exists = user_profile.validate_existing_user_profile_id(user_profile_id)
+
+    if user_profile_id_exists == False:
+        return helpers.send_json_response(None, 'Perfil no encontrado.', 'bad_request', False)
+
+    activity.finish_user_profile_activities(user_profile_id)
+
+    activity_id = activity.create_activity(user_profile_id, task_selected)
+
+    # Response
+    return helpers.send_json_response({ 'ActivityId': activity_id })
 
 
-@tasks.route('/tasks/<string:task_id>/finish', methods=['POST'])
-def finish_task(task_id):
+@tasks.route('/tasks/<string:activity_id>', methods=['GET'])
+def get_task_options(activity_id):
+    # Body
+    body = helpers.get_request_json(request)
 
-    # TODO Finalizar la sesión de la actividad en BD.
+    current_activity = activity.get_single_by_activity_id(activity_id);
 
-    return send_json_response()
+    if current_activity == None:
+        return helpers.send_json_response(None, 'Actividad no encontrada.', 'bad_request', False)
+
+    task_node_id = helpers.get_number_or_default_param(body, 'selectedOption')
+
+    if task_node_id == 0:
+        activity.set_activity_start(activity_id)
+        task_node_id = task_node.get_first_task_node_id(current_activity['TaskId'])
+    else:
+        task_node_name = task_node.get_task_node_name(task_node_id)
+        activity.update_activity_result(activity_id, task_node_name)
+
+    options = task_node.get_child_nodes(task_node_id)
+
+    if options:
+
+        for option in options:
+            option['TaskNodeImage'] = os.getenv('URL_BLOB') + '/assets/images/tasks-nodes/' + str(option['TaskNodeId']) + '.png'
+
+        return helpers.send_json_response({ 'Options': options })
+    else:
+        activity.set_activity_end(activity_id)
+        return helpers.send_json_response(None, 'Actividad finalizada')
 
 
-# Helpers
+@tasks.route('/tasks/finish', methods=['POST'])
+def finish_task():
+    # Body
+    body = helpers.get_request_json(request)
 
-def get_request_json(request):
-    return request.json if request.is_json else None
+    activity_id = helpers.get_number_or_default_param(body, 'activityId')
 
-def send_json_response(data = None, msg = None, code = None, ok = True):
-    return {
-    'msg': msg,
-    'code': code,
-    'data': data,
-    'ok': ok
-    }
+    activity_to_end = activity.get_single_by_activity_id(activity_id);
+
+    if activity_to_end == None:
+        return helpers.send_json_response(None, 'Actividad no encontrada.', 'bad_request', False)
+
+    if activity_to_end['ActivityStatus'] == 1:
+        activity.set_activity_end(activity_id)
+
+    return helpers.send_json_response()

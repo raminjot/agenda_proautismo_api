@@ -1,5 +1,5 @@
 # Dependecies import
-from flask import Blueprint, request, jsonify, json
+from flask import Blueprint, request
 
 # Models import
 from models import user
@@ -54,7 +54,7 @@ def login():
 
 @users.route('/users/<string:user_id>/profiles', methods=['GET'])
 def get_profiles(user_id):
-    profiles = user_profile.get_all_by_user_id(user_id)
+    profiles = user_profile.get_list_by_user_id(user_id)
 
     # Response
     return helpers.send_json_response({ 'Profiles': profiles })

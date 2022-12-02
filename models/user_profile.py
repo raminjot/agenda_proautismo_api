@@ -15,7 +15,7 @@ def create_user_profile(user_id, first_name, last_name): # Number
     return cursor.lastrowid
 
 
-def get_all_by_user_id(user_id): # Object[]
+def get_list_by_user_id(user_id): # Object[]
     query = 'SELECT UserProfileId, FirstName, LastName FROM tblUsersProfiles Where UserId = %s ORDER BY FirstName ASC'
 
     cursor = mysql.connection.cursor()
@@ -24,3 +24,14 @@ def get_all_by_user_id(user_id): # Object[]
     cursor.close()
 
     return rows
+
+
+def validate_existing_user_profile_id(user_profile_id): # Boolean
+    query = 'SELECT UserProfileId FROM tblUsersProfiles WHERE UserProfileId = %s LIMIT 1';    
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (user_profile_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    
+    return False if row == None else True

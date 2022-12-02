@@ -45,10 +45,7 @@ def validate_existing_user_id(user_id): # Boolean
     row = cursor.fetchone()
     cursor.close()
 
-    if row == None:
-        return False
-
-    return True
+    return False if row == None else True
 
 
 def validate_existing_username(username): # Boolean
@@ -59,7 +56,4 @@ def validate_existing_username(username): # Boolean
     row = cursor.fetchone()
     cursor.close()
 
-    if row == None:
-        return False
-
-    return True
+    return False if row == None else True
