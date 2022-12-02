@@ -12,11 +12,15 @@ example = Blueprint('example', __name__)
 
 @example.route('/example', methods=['GET'])
 def get_example():
-    test.verify_connection()
-    return {
-        'controller': 'Example',
-        'method': 'GET'
-        }
+    try:
+        test.verify_connection()
+        return {
+            'controller': 'Example',
+            'method': 'GET'
+            }
+    except Exception as e:
+        return str(e)
+
 
 @example.route('/example', methods=['POST'])
 def post_example():
@@ -25,6 +29,7 @@ def post_example():
         'method': 'POST',
         'body': get_request_json(request)
         }
+
 
 @example.route('/example/<string:id>', methods=['PUT'])
 def put_example(id):
@@ -37,6 +42,7 @@ def put_example(id):
             }
         }
 
+
 @example.route('/example/<string:id>', methods=['PATCH'])
 def patch_example(id):
     return {
@@ -47,6 +53,7 @@ def patch_example(id):
             'id': id
             }
         }
+
 
 @example.route('/example/<string:id>', methods=['DELETE'])
 def delete_example(id):

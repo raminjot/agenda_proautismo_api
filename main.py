@@ -11,4 +11,4 @@ app.register_blueprint(controllers.users)
 
 # Starting the app
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
