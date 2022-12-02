@@ -1,6 +1,9 @@
 # Dependecies import
 from flask import Blueprint, request, jsonify
 
+# Models import
+from models import test
+
 # Controller initialization
 example = Blueprint('example', __name__)
 
@@ -9,6 +12,7 @@ example = Blueprint('example', __name__)
 
 @example.route('/example', methods=['GET'])
 def get_example():
+    test.verify_connection()
     return {
         'controller': 'Example',
         'method': 'GET'
