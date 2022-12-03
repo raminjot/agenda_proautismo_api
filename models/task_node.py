@@ -5,7 +5,7 @@ from services.db import mysql
 # Database functions
 
 def get_child_nodes(task_node_id): # Object[]
-    query = 'SELECT TaskNodeId, "" AS "TaskNodeImage"  FROM tblTasksNodes WHERE TaskNodeFatherId = %s'
+    query = 'SELECT TaskNodeId, TaskNodeOption, "" AS "TaskNodeImage"  FROM tblTasksNodes WHERE TaskNodeFatherId = %s'
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (task_node_id,))

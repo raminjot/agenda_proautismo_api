@@ -72,8 +72,9 @@ def create_profile(user_id):
 
     first_name = helpers.get_string_or_default_param(body, 'firstName')
     last_name = helpers.get_string_or_default_param(body, 'lastName')
+    user_profile_status = helpers.get_string_or_default_param(body, 'userProfileStatus')
 
-    user_profile_id = user_profile.create_user_profile(user_id, first_name, last_name)
+    user_profile_id = user_profile.create_user_profile(user_id, first_name, last_name, user_profile_status)
 
     # Response
     return helpers.send_json_response({ 'UserProfileId': user_profile_id }, 'Perfil creado exitosamente.')

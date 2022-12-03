@@ -87,7 +87,7 @@ def get_task_options(activity_id):
         return helpers.send_json_response({ 'Options': options })
     else:
         activity.set_activity_end(activity_id)
-        return helpers.send_json_response(None, 'Actividad finalizada')
+        return helpers.send_json_response({ 'Options': [] }, 'Actividad finalizada')
 
 
 @tasks.route('/tasks/finish', methods=['POST'])

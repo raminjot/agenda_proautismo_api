@@ -4,11 +4,11 @@ from services.db import mysql
 
 # Database functions
 
-def create_user_profile(user_id, first_name, last_name): # Number
-    query = 'INSERT INTO tblUsersProfiles(UserId, FirstName, LastName, UserProfileStatus) VALUES(%s, %s, %s, 1)'
+def create_user_profile(user_id, first_name, last_name, user_profile_status): # Number
+    query = 'INSERT INTO tblUsersProfiles(UserId, FirstName, LastName, UserProfileStatus) VALUES(%s, %s, %s, %s)'
 
     cursor = mysql.connection.cursor()
-    cursor.execute(query, (user_id, first_name, last_name,))
+    cursor.execute(query, (user_id, first_name, last_name, user_profile_status,))
     mysql.connection.commit()
     cursor.close()
 
@@ -16,7 +16,7 @@ def create_user_profile(user_id, first_name, last_name): # Number
 
 
 def get_list_by_user_id(user_id): # Object[]
-    query = 'SELECT UserProfileId, FirstName, LastName FROM tblUsersProfiles Where UserId = %s ORDER BY FirstName ASC'
+    query = 'SELECT UserProfileId, FirstName, LastName, UserProfileStatus FROM tblUsersProfiles Where UserId = %s ORDER BY FirstName ASC'
 
     cursor = mysql.connection.cursor()
     cursor.execute(query, (user_id,))
